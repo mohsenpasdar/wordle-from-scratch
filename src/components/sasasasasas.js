@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { wordle, db, keyboardLetters } from '../helpers/words.js'
-import { distinction } from '../helpers/distinction.js';
+import React, { useState } from 'react';
+import { wordle, db } from '../helpers/words.js'
 
 const AllInOne = () => {
 
@@ -10,10 +9,15 @@ const AllInOne = () => {
     const [ID, setID] = useState(Array(30).fill(''))
 
     const [boxNo, setBoxNo] = useState(0)
+    // console.log('row', row);
+    // console.log('boxno', boxNo);
+    console.log(array);
+    console.log(ID);
 
     const onClick = (e) => {
         if ((boxNo / (5 * row)) !== 1 && boxNo < 30) {
             array[boxNo] = e.target.innerHTML
+            console.log(array);
             setBoxNo(boxNo => ++boxNo)
         }
     }
@@ -21,68 +25,49 @@ const AllInOne = () => {
         if (boxNo % 5 !== 0 || boxNo / (5 * row) === 1) {
             setBoxNo(boxNo => --boxNo)
             array[boxNo - 1] = ''
+            console.log(array);
         }
+
     }
 
     const handleEnter = () => {
-        if (row < 7 && boxNo % (5 * row) === 0 && boxNo !== 0) {
-            const guess = array.slice(boxNo - 5, boxNo).join('')
-
+        if (row < 7 && boxNo % (5*row) === 0 && boxNo !==0) {
+            const guessArray = array.slice(boxNo - 5, boxNo)
+            const guess = guessArray.join('')
+            const wordleArrayClone = [...wordleArray]
             if (db.includes(guess)) {
-                setID(distinction(wordleArray, array))
+                console.log('included');
+                setID(state => state.map((id, idx) => {
+                    if (array[idx] === wordleArrayClone[idx % 5]) {
+                        
+                        return 'exact'
+                    } else if (wordleArrayClone.includes(array[idx])) {
+                        return "exist"
+                    } else if (!array[idx]) {
+                        return ''
+                    } else {
+                        return 'wrong'
+                    }
+                }))
+                console.log(ID);
                 setRow(row => ++row)
             }
             else alert('not in word list')
         }
+        
     }
 
-    // const handleKeyDown = (event) => {
-    //     if ((boxNo / (5 * row)) !== 1 && boxNo < 30) {
-    //         array[boxNo] = event.key.toUpperCase()
-    //         console.log(event.key.toUpperCase());
-    //         setBoxNo(boxNo => ++boxNo)
-    //     }
-    // }
-    const keyPress = (e) => {
-        if (keyboardLetters.includes(e.key.toUpperCase())) {
-            if ((boxNo / (5 * row)) !== 1 && boxNo < 30) {
-                array[boxNo] = e.key.toUpperCase()
-                setBoxNo(boxNo => ++boxNo)
-            }
-        } else if (e.key === 'Enter') {
-            if (row < 7 && boxNo % (5 * row) === 0 && boxNo !== 0) {
-                const guess = array.slice(boxNo - 5, boxNo).join('')
-
-                if (db.includes(guess)) {
-                    setID(distinction(wordleArray, array))
-                    setRow(row => ++row)
-                }
-                else alert('not in word list')
-            }
-        } else if (e.key === 'Delete' || e.key === 'Backspace') {
-            if (boxNo % 5 !== 0 || boxNo / (5 * row) === 1) {
-                setBoxNo(boxNo => --boxNo)
-                array[boxNo - 1] = ''
-            }
-        }
-    }
-
-    useEffect(() => {
-        document.addEventListener('keydown', keyPress)
-        return () => document.removeEventListener('keydown', keyPress)
-    })
-
-
+    // const [id, setId] = useState('exact')
 
     return (
         <div>
             <h1>Wordle game</h1>
             <div className='boxes-container'>
                 {array.map((letter, idx) => (
-                    <div className="box-item" key={idx} id='zxc' >
-                        <button
-                            className="button"
-                            value={idx}
+                    <div className="box-item" key={idx} >
+                        <button 
+                            className="button" 
+                            value={idx} 
                             id={ID[idx]}
                         >
                             {letter}
