@@ -30,6 +30,7 @@ const AllInOne = () => {
 
             if (db.includes(guess)) {
                 setID(distinction(wordleArray, array))
+                
                 setRow(row => ++row)
             }
             else alert('not in word list')
@@ -67,6 +68,20 @@ const AllInOne = () => {
         }
     }
 
+    const handleKeyId = (str) => {
+        let keyId;
+        array.forEach((letter, idx) => {
+            if (letter === str && ID[idx] === 'exact') {
+                keyId = 'exact'
+            } else if (letter === str && ID[idx] === 'exist' && keyId !== 'exact') {
+                keyId = 'exist'
+            } else if (letter === str && ID[idx] === 'wrong') {
+                keyId = 'wrong'
+            }
+        })
+        return keyId
+    }
+
     useEffect(() => {
         document.addEventListener('keydown', keyPress)
         return () => document.removeEventListener('keydown', keyPress)
@@ -93,37 +108,37 @@ const AllInOne = () => {
 
             <div className='kbContainer'>
                 <div>
-                    <button className='buttonKeybord' onClick={onClick}>Q</button>
-                    <button className='buttonKeybord' onClick={onClick}>W</button>
-                    <button className='buttonKeybord' onClick={onClick}>E</button>
-                    <button className='buttonKeybord' onClick={onClick}>R</button>
-                    <button className='buttonKeybord' onClick={onClick}>T</button>
-                    <button className='buttonKeybord' onClick={onClick}>Y</button>
-                    <button className='buttonKeybord' onClick={onClick}>U</button>
-                    <button className='buttonKeybord' onClick={onClick}>I</button>
-                    <button className='buttonKeybord' onClick={onClick}>O</button>
-                    <button className='buttonKeybord' onClick={onClick}>P</button>
+                    <button className='buttonKeybord' id={handleKeyId('Q')} onClick={onClick}>Q</button>
+                    <button className='buttonKeybord' id={handleKeyId('W')} onClick={onClick}>W</button>
+                    <button className='buttonKeybord' id={handleKeyId('E')} onClick={onClick}>E</button>
+                    <button className='buttonKeybord' id={handleKeyId('R')} onClick={onClick}>R</button>
+                    <button className='buttonKeybord' id={handleKeyId('T')} onClick={onClick}>T</button>
+                    <button className='buttonKeybord' id={handleKeyId('Y')} onClick={onClick}>Y</button>
+                    <button className='buttonKeybord' id={handleKeyId('U')} onClick={onClick}>U</button>
+                    <button className='buttonKeybord' id={handleKeyId('I')} onClick={onClick}>I</button>
+                    <button className='buttonKeybord' id={handleKeyId('O')} onClick={onClick}>O</button>
+                    <button className='buttonKeybord' id={handleKeyId('P')} onClick={onClick}>P</button>
                 </div>
                 <div>
-                    <button className='buttonKeybord' onClick={onClick}>A</button>
-                    <button className='buttonKeybord' onClick={onClick}>S</button>
-                    <button className='buttonKeybord' onClick={onClick}>D</button>
-                    <button className='buttonKeybord' onClick={onClick}>F</button>
-                    <button className='buttonKeybord' onClick={onClick}>G</button>
-                    <button className='buttonKeybord' onClick={onClick}>H</button>
-                    <button className='buttonKeybord' onClick={onClick}>J</button>
-                    <button className='buttonKeybord' onClick={onClick}>K</button>
-                    <button className='buttonKeybord' onClick={onClick}>L</button>
+                    <button className='buttonKeybord' id={handleKeyId('A')} onClick={onClick}>A</button>
+                    <button className='buttonKeybord' id={handleKeyId('S')} onClick={onClick}>S</button>
+                    <button className='buttonKeybord' id={handleKeyId('D')} onClick={onClick}>D</button>
+                    <button className='buttonKeybord' id={handleKeyId('F')} onClick={onClick}>F</button>
+                    <button className='buttonKeybord' id={handleKeyId('G')} onClick={onClick}>G</button>
+                    <button className='buttonKeybord' id={handleKeyId('H')} onClick={onClick}>H</button>
+                    <button className='buttonKeybord' id={handleKeyId('J')} onClick={onClick}>J</button>
+                    <button className='buttonKeybord' id={handleKeyId('K')} onClick={onClick}>K</button>
+                    <button className='buttonKeybord' id={handleKeyId('L')} onClick={onClick}>L</button>
                 </div>
                 <div>
                     <button className='buttonKeybord buttonKeybord--auto' onClick={handleEnter}>Enter</button>
-                    <button className='buttonKeybord' onClick={onClick}>Z</button>
-                    <button className='buttonKeybord' onClick={onClick}>X</button>
-                    <button className='buttonKeybord' onClick={onClick}>C</button>
-                    <button className='buttonKeybord' onClick={onClick}>V</button>
-                    <button className='buttonKeybord' onClick={onClick}>B</button>
-                    <button className='buttonKeybord' onClick={onClick}>N</button>
-                    <button className='buttonKeybord' onClick={onClick}>M</button>
+                    <button className='buttonKeybord' id={handleKeyId('Z')} onClick={onClick}>Z</button>
+                    <button className='buttonKeybord' id={handleKeyId('X')} onClick={onClick}>X</button>
+                    <button className='buttonKeybord' id={handleKeyId('C')} onClick={onClick}>C</button>
+                    <button className='buttonKeybord' id={handleKeyId('V')} onClick={onClick}>V</button>
+                    <button className='buttonKeybord' id={handleKeyId('B')} onClick={onClick}>B</button>
+                    <button className='buttonKeybord' id={handleKeyId('N')} onClick={onClick}>N</button>
+                    <button className='buttonKeybord' id={handleKeyId('M')} onClick={onClick}>M</button>
                     <button className='buttonKeybord buttonKeybord--auto' onClick={handleDel}>del</button>
                 </div>
             </div>
