@@ -91,7 +91,7 @@ const AllInOne = () => {
 
     return (
         <div>
-            <h1>Wordle game</h1>
+            <h1>WORDLE</h1>
             <div className='boxes-container'>
                 {array.map((letter, idx) => (
                     <div className="box-item" key={idx} id='zxc' >
