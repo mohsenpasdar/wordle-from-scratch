@@ -3,102 +3,163 @@ import { wordle, db, keyboardLetters } from '../helpers/words.js'
 import { distinction } from '../helpers/distinction.js';
 
 const AllInOne = () => {
-
     const wordleArray = wordle.split('')
-    const [array, setArray] = useState(Array(30).fill(""));
-    const [row, setRow] = useState(1)
-    const [ID, setID] = useState(Array(30).fill(''))
-
-    const [boxNo, setBoxNo] = useState(0)
+    const [state, setState] = useState({
+        row: 1,
+        boxNo: 0,
+        array: Array(30).fill(""),
+        keysId: Array(30).fill(''),
+        gameStatus: 'playing',
+        disable: false
+    })
 
     const onClick = (e) => {
-        if ((boxNo / (5 * row)) !== 1 && boxNo < 30) {
-            array[boxNo] = e.target.innerHTML
-            setBoxNo(boxNo => ++boxNo)
+        if ((state.boxNo / (5 * state.row)) !== 1 && state.boxNo < 30) {
+            state.array[state.boxNo] = e.target.innerHTML
+            setState(state => ({
+                ...state,
+                boxNo: ++state.boxNo
+            }))
         }
     }
+
     const handleDel = () => {
-        if (boxNo % 5 !== 0 || boxNo / (5 * row) === 1) {
-            setBoxNo(boxNo => --boxNo)
-            array[boxNo - 1] = ''
+        if (state.boxNo % 5 !== 0 || state.boxNo / (5 * state.row) === 1) {
+            setState(state => ({
+                ...state,
+                boxNo: --state.boxNo
+            }))
+            state.array[state.boxNo - 1] = ''
         }
     }
 
     const handleEnter = () => {
-        if (row < 7 && boxNo % (5 * row) === 0 && boxNo !== 0) {
-            const guess = array.slice(boxNo - 5, boxNo).join('')
+        if (state.row < 7 && state.boxNo % (5 * state.row) === 0 && state.boxNo !== 0) {
+            const guess = state.array.slice(state.boxNo - 5, state.boxNo).join('')
 
             if (db.includes(guess)) {
-                setID(distinction(wordleArray, array))
-                
-                setRow(row => ++row)
+                setState(state => ({
+                    ...state,
+                    keysId: distinction(wordleArray, state.array)
+                }))
+
+                setState(state => ({
+                    ...state,
+                    row: ++state.row
+                }))
+
+                setState(state => ({
+                    ...state,
+                    gameStatus: checkGameStatus(state.keysId.slice(state.boxNo - 5, state.boxNo), state.row)
+                }))
+
+                setState(state => ({
+                    ...state,
+                    disable: state.gameStatus === 'success' || state.gameStatus === 'failure'
+                }))
             }
             else alert('not in word list')
         }
     }
 
-    // const handleKeyDown = (event) => {
-    //     if ((boxNo / (5 * row)) !== 1 && boxNo < 30) {
-    //         array[boxNo] = event.key.toUpperCase()
-    //         console.log(event.key.toUpperCase());
-    //         setBoxNo(boxNo => ++boxNo)
-    //     }
-    // }
     const keyPress = (e) => {
-        if (keyboardLetters.includes(e.key.toUpperCase())) {
-            if ((boxNo / (5 * row)) !== 1 && boxNo < 30) {
-                array[boxNo] = e.key.toUpperCase()
-                setBoxNo(boxNo => ++boxNo)
+        if (keyboardLetters.includes(e.key.toUpperCase()) && !state.disable) {
+            if ((state.boxNo / (5 * state.row)) !== 1 && state.boxNo < 30) {
+                state.array[state.boxNo] = e.key.toUpperCase()
+                setState(state => ({
+                    ...state,
+                    boxNo: ++state.boxNo
+                }))
             }
         } else if (e.key === 'Enter') {
-            if (row < 7 && boxNo % (5 * row) === 0 && boxNo !== 0) {
-                const guess = array.slice(boxNo - 5, boxNo).join('')
+            if (state.row < 7 && state.boxNo % (5 * state.row) === 0 && state.boxNo !== 0) {
+                const guess = state.array.slice(state.boxNo - 5, state.boxNo).join('')
 
                 if (db.includes(guess)) {
-                    setID(distinction(wordleArray, array))
-                    setRow(row => ++row)
+                    setState(state => ({
+                        ...state,
+                        keysId: distinction(wordleArray, state.array)
+                    }))
+                    setState(state => ({
+                        ...state,
+                        row: ++state.row
+                    }))
+                    setState(state => ({
+                        ...state,
+                        gameStatus: checkGameStatus(state.keysId.slice(state.boxNo - 5, state.boxNo), state.row)
+                    }))
+
+                    setState(state => ({
+                        ...state,
+                        disable: state.gameStatus === 'success' || state.gameStatus === 'failure'
+                    }))
                 }
                 else alert('not in word list')
             }
         } else if (e.key === 'Delete' || e.key === 'Backspace') {
-            if (boxNo % 5 !== 0 || boxNo / (5 * row) === 1) {
-                setBoxNo(boxNo => --boxNo)
-                array[boxNo - 1] = ''
+            if (state.boxNo % 5 !== 0 || state.boxNo / (5 * state.row) === 1) {
+                setState(state => ({
+                    ...state,
+                    boxNo: --state.boxNo
+                }))
+                state.array[state.boxNo - 1] = ''
             }
         }
     }
 
     const handleKeyId = (str) => {
         let keyId;
-        array.forEach((letter, idx) => {
-            if (letter === str && ID[idx] === 'exact') {
+        state.array.forEach((letter, idx) => {
+            if (letter === str && state.keysId[idx] === 'exact') {
                 keyId = 'exact'
-            } else if (letter === str && ID[idx] === 'exist' && keyId !== 'exact') {
+            } else if (letter === str && state.keysId[idx] === 'exist' && keyId !== 'exact') {
                 keyId = 'exist'
-            } else if (letter === str && ID[idx] === 'wrong') {
+            } else if (letter === str && state.keysId[idx] === 'wrong') {
                 keyId = 'wrong'
             }
         })
         return keyId
     }
 
+    const checkGameStatus = (arr, row) => {
+        // console.log('arr', arr)
+        // console.log(state.row)
+        if (arr.every(element => element === 'exact')) {
+            return 'success'
+        }
+        else if (row === 7 && !arr.every(element => element === 'exact')) {
+            return 'failure'
+        }
+    }
+
+    const handleResetGAme = () => {
+        setState({
+            ...state,
+            row: 1,
+            boxNo: 0,
+            array: Array(30).fill(""),
+            keysId: Array(30).fill(''),
+            gameStatus: 'playing',
+            disable: false
+        })
+    }
+
+
     useEffect(() => {
         document.addEventListener('keydown', keyPress)
         return () => document.removeEventListener('keydown', keyPress)
     })
 
-
-
     return (
         <div>
             <h1>WORDLE</h1>
             <div className='boxes-container'>
-                {array.map((letter, idx) => (
+                {state.array.map((letter, idx) => (
                     <div className="box-item" key={idx} id='zxc' >
                         <button
                             className="button"
                             value={idx}
-                            id={ID[idx]}
+                            id={state.keysId[idx]}
                         >
                             {letter}
                         </button>
@@ -108,40 +169,45 @@ const AllInOne = () => {
 
             <div className='kbContainer'>
                 <div>
-                    <button className='buttonKeybord' id={handleKeyId('Q')} onClick={onClick}>Q</button>
-                    <button className='buttonKeybord' id={handleKeyId('W')} onClick={onClick}>W</button>
-                    <button className='buttonKeybord' id={handleKeyId('E')} onClick={onClick}>E</button>
-                    <button className='buttonKeybord' id={handleKeyId('R')} onClick={onClick}>R</button>
-                    <button className='buttonKeybord' id={handleKeyId('T')} onClick={onClick}>T</button>
-                    <button className='buttonKeybord' id={handleKeyId('Y')} onClick={onClick}>Y</button>
-                    <button className='buttonKeybord' id={handleKeyId('U')} onClick={onClick}>U</button>
-                    <button className='buttonKeybord' id={handleKeyId('I')} onClick={onClick}>I</button>
-                    <button className='buttonKeybord' id={handleKeyId('O')} onClick={onClick}>O</button>
-                    <button className='buttonKeybord' id={handleKeyId('P')} onClick={onClick}>P</button>
+                    <button className='buttonKeybord' id={handleKeyId('Q')} onClick={onClick} disabled={state.disable}>Q</button>
+                    <button className='buttonKeybord' id={handleKeyId('W')} onClick={onClick} disabled={state.disable}>W</button>
+                    <button className='buttonKeybord' id={handleKeyId('E')} onClick={onClick} disabled={state.disable}>E</button>
+                    <button className='buttonKeybord' id={handleKeyId('R')} onClick={onClick} disabled={state.disable}>R</button>
+                    <button className='buttonKeybord' id={handleKeyId('T')} onClick={onClick} disabled={state.disable}>T</button>
+                    <button className='buttonKeybord' id={handleKeyId('Y')} onClick={onClick} disabled={state.disable}>Y</button>
+                    <button className='buttonKeybord' id={handleKeyId('U')} onClick={onClick} disabled={state.disable}>U</button>
+                    <button className='buttonKeybord' id={handleKeyId('I')} onClick={onClick} disabled={state.disable}>I</button>
+                    <button className='buttonKeybord' id={handleKeyId('O')} onClick={onClick} disabled={state.disable}>O</button>
+                    <button className='buttonKeybord' id={handleKeyId('P')} onClick={onClick} disabled={state.disable}>P</button>
                 </div>
                 <div>
-                    <button className='buttonKeybord' id={handleKeyId('A')} onClick={onClick}>A</button>
-                    <button className='buttonKeybord' id={handleKeyId('S')} onClick={onClick}>S</button>
-                    <button className='buttonKeybord' id={handleKeyId('D')} onClick={onClick}>D</button>
-                    <button className='buttonKeybord' id={handleKeyId('F')} onClick={onClick}>F</button>
-                    <button className='buttonKeybord' id={handleKeyId('G')} onClick={onClick}>G</button>
-                    <button className='buttonKeybord' id={handleKeyId('H')} onClick={onClick}>H</button>
-                    <button className='buttonKeybord' id={handleKeyId('J')} onClick={onClick}>J</button>
-                    <button className='buttonKeybord' id={handleKeyId('K')} onClick={onClick}>K</button>
-                    <button className='buttonKeybord' id={handleKeyId('L')} onClick={onClick}>L</button>
+                    <button className='buttonKeybord' id={handleKeyId('A')} onClick={onClick} disabled={state.disable}>A</button>
+                    <button className='buttonKeybord' id={handleKeyId('S')} onClick={onClick} disabled={state.disable}>S</button>
+                    <button className='buttonKeybord' id={handleKeyId('D')} onClick={onClick} disabled={state.disable}>D</button>
+                    <button className='buttonKeybord' id={handleKeyId('F')} onClick={onClick} disabled={state.disable}>F</button>
+                    <button className='buttonKeybord' id={handleKeyId('G')} onClick={onClick} disabled={state.disable}>G</button>
+                    <button className='buttonKeybord' id={handleKeyId('H')} onClick={onClick} disabled={state.disable}>H</button>
+                    <button className='buttonKeybord' id={handleKeyId('J')} onClick={onClick} disabled={state.disable}>J</button>
+                    <button className='buttonKeybord' id={handleKeyId('K')} onClick={onClick} disabled={state.disable}>K</button>
+                    <button className='buttonKeybord' id={handleKeyId('L')} onClick={onClick} disabled={state.disable}>L</button>
                 </div>
                 <div>
-                    <button className='buttonKeybord buttonKeybord--auto' onClick={handleEnter}>Enter</button>
-                    <button className='buttonKeybord' id={handleKeyId('Z')} onClick={onClick}>Z</button>
-                    <button className='buttonKeybord' id={handleKeyId('X')} onClick={onClick}>X</button>
-                    <button className='buttonKeybord' id={handleKeyId('C')} onClick={onClick}>C</button>
-                    <button className='buttonKeybord' id={handleKeyId('V')} onClick={onClick}>V</button>
-                    <button className='buttonKeybord' id={handleKeyId('B')} onClick={onClick}>B</button>
-                    <button className='buttonKeybord' id={handleKeyId('N')} onClick={onClick}>N</button>
-                    <button className='buttonKeybord' id={handleKeyId('M')} onClick={onClick}>M</button>
-                    <button className='buttonKeybord buttonKeybord--auto' onClick={handleDel}>del</button>
+                    <button className='buttonKeybord buttonKeybord--auto' onClick={handleEnter} disabled={state.disable}>Enter</button>
+                    <button className='buttonKeybord' id={handleKeyId('Z')} onClick={onClick} disabled={state.disable} >Z</button>
+                    <button className='buttonKeybord' id={handleKeyId('X')} onClick={onClick} disabled={state.disable}>X</button>
+                    <button className='buttonKeybord' id={handleKeyId('C')} onClick={onClick} disabled={state.disable}>C</button>
+                    <button className='buttonKeybord' id={handleKeyId('V')} onClick={onClick} disabled={state.disable}>V</button>
+                    <button className='buttonKeybord' id={handleKeyId('B')} onClick={onClick} disabled={state.disable}>B</button>
+                    <button className='buttonKeybord' id={handleKeyId('N')} onClick={onClick} disabled={state.disable}>N</button>
+                    <button className='buttonKeybord' id={handleKeyId('M')} onClick={onClick} disabled={state.disable}>M</button>
+                    <button className='buttonKeybord buttonKeybord--auto' onClick={handleDel} disabled={state.disable}>delete</button>
                 </div>
             </div>
+            {state.gameStatus && (state.gameStatus === 'success' ?
+                <h1>Great, you guessed the wordle!</h1> :
+                state.gameStatus === 'failure' ? <h1>Nice try, the wordle was {wordle}</h1> : ''
+            )}
+            {state.disable && (state.disable ? <button onClick={handleResetGAme}>NEW GAME</button> : '')}
         </div>
     );
 };
