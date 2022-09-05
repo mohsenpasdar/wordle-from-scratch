@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { wordle, db, keyboardLetters } from '../helpers/words.js'
+import { keyboardLetters, generateWordSet } from '../helpers/words.js'
 import { distinction } from '../helpers/distinction.js';
 
 const AllInOne = () => {
-    const wordleArray = wordle.split('')
+    const [wordSet, setWordSet] = useState(new Set())
+    const [todayWord, setTodayWord] = useState('')
+    const [newGame, setNewGame] = useState(false)
+    
+
+    const wordleArray = todayWord.toUpperCase().split('')
     const [state, setState] = useState({
         row: 1,
         boxNo: 0,
@@ -37,7 +42,7 @@ const AllInOne = () => {
         if (state.row < 7 && state.boxNo % (5 * state.row) === 0 && state.boxNo !== 0) {
             const guess = state.array.slice(state.boxNo - 5, state.boxNo).join('')
 
-            if (db.includes(guess)) {
+            if (wordSet.has(guess.toLocaleLowerCase())) {
                 setState(state => ({
                     ...state,
                     keysId: distinction(wordleArray, state.array)
@@ -75,7 +80,7 @@ const AllInOne = () => {
             if (state.row < 7 && state.boxNo % (5 * state.row) === 0 && state.boxNo !== 0) {
                 const guess = state.array.slice(state.boxNo - 5, state.boxNo).join('')
 
-                if (db.includes(guess)) {
+                if (wordSet.has(guess.toLocaleLowerCase())) {
                     setState(state => ({
                         ...state,
                         keysId: distinction(wordleArray, state.array)
@@ -142,6 +147,7 @@ const AllInOne = () => {
             gameStatus: 'playing',
             disable: false
         })
+        setNewGame(!newGame)
     }
 
 
@@ -149,6 +155,13 @@ const AllInOne = () => {
         document.addEventListener('keydown', keyPress)
         return () => document.removeEventListener('keydown', keyPress)
     })
+
+    useEffect(() => {
+        generateWordSet().then(words => {
+            setWordSet(words.wordSet)
+            setTodayWord(words.todayWord)
+        })
+    }, [newGame])
 
     return (
         <div>
@@ -205,7 +218,7 @@ const AllInOne = () => {
             </div>
             {state.gameStatus && (state.gameStatus === 'success' ?
                 <h1>Great, you guessed the wordle!</h1> :
-                state.gameStatus === 'failure' ? <h1>Nice try, the wordle was {wordle}</h1> : ''
+                state.gameStatus === 'failure' ? <h1>Nice try, the wordle was {todayWord.toUpperCase()}</h1> : ''
             )}
             {state.disable && (state.disable ? <button onClick={handleResetGAme}>NEW GAME</button> : '')}
         </div>
