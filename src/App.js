@@ -21,26 +21,6 @@ const App = () => {
     disable: false
   })
 
-  const onClick = (e) => {
-    if ((state.boxNo / (5 * state.row)) !== 1 && state.boxNo < 30) {
-      state.array[state.boxNo] = e.target.innerHTML
-      setState(state => ({
-        ...state,
-        boxNo: ++state.boxNo
-      }))
-    }
-  }
-
-  const handleDel = () => {
-    if (state.boxNo % 5 !== 0 || state.boxNo / (5 * state.row) === 1) {
-      setState(state => ({
-        ...state,
-        boxNo: --state.boxNo
-      }))
-      state.array[state.boxNo - 1] = ''
-    }
-  }
-
   const handleEnter = () => {
     if (state.row < 7 && state.boxNo % (5 * state.row) === 0 && state.boxNo !== 0) {
       const guess = state.array.slice(state.boxNo - 5, state.boxNo).join('')
@@ -154,7 +134,7 @@ const App = () => {
 
   return (
     <div className='App'>
-      <Context.Provider value={{ onClick, state, handleDel, handleEnter }}>
+      <Context.Provider value={{ state, setState, handleEnter }}>
         <h1 id={'title'}>WORDLE</h1>
         <Board />
         <Keyboard />

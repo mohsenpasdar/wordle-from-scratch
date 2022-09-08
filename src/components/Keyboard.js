@@ -2,7 +2,27 @@ import React, { useContext } from 'react';
 import Context from '../context/Context';
 
 const Keyboard = () => {
-    const { onClick, handleDel, handleEnter, state } = useContext(Context)
+    const { state, setState, handleEnter } = useContext(Context)
+
+    const onClick = (e) => {
+      if ((state.boxNo / (5 * state.row)) !== 1 && state.boxNo < 30) {
+        state.array[state.boxNo] = e.target.innerHTML
+        setState(state => ({
+          ...state,
+          boxNo: ++state.boxNo
+        }))
+      }
+    }
+  
+    const handleDel = () => {
+      if (state.boxNo % 5 !== 0 || state.boxNo / (5 * state.row) === 1) {
+        setState(state => ({
+          ...state,
+          boxNo: --state.boxNo
+        }))
+        state.array[state.boxNo - 1] = ''
+      }
+    }
 
     const handleKeyId = (str) => {
         let keyId;
