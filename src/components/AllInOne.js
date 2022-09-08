@@ -127,8 +127,6 @@ const AllInOne = () => {
     }
 
     const checkGameStatus = (arr, row) => {
-        // console.log('arr', arr)
-        // console.log(state.row)
         if (arr.every(element => element === 'exact')) {
             return 'success'
         }
